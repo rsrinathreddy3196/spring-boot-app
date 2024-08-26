@@ -1,4 +1,7 @@
-FROM openjdk:17-jdk-alpine AS builder
+ROM openjdk:17-jdk-alpine AS builder
+
+# Install apt-get
+RUN apk add --no-cache bash
 
 COPY src /src
 
