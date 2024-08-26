@@ -1,28 +1,18 @@
-# Stage 1: Build the application
-FROM maven:3.8.6-openjdk-17 AS build
+FROM openjdk:17-jdk-alpine AS builder
 
-# Set the working directory
-WORKDIR /app
+COPY src /src
 
-# Copy the pom.xml and download dependencies
-COPY pom.xml .
-RUN mvn dependency:go-offline
+WORKDIR /src
 
-# Copy the source code
-COPY src /app/src
+RUN apt-get update && apt-get install -y maven
 
-# Package the application
-RUN mvn clean package -DskipTests
+RUN mvn clean package
 
-# Stage 2: Create the runtime image
 FROM openjdk:17-jdk-alpine
 
-# Set the working directory
+COPY --from=builder target/demo-0.0.1-SNAPSHOT.jar /app/demo.jar
+
 WORKDIR /app
 
-# Copy the jar file from the build stage
-COPY --from=build /app/target/demo-0.0.1-SNAPSHOT.jar /app/demo-0.0.1-SNAPSHOT.jar
-
-# Set the entry point
-ENTRYPOINT ["java", "-jar", "/app/demo-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "demo.jar"]
 
